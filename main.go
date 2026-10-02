@@ -34,17 +34,6 @@ var settings = Settings{Domain: "railway.app"}
 var admin = Admin{Username: "admin", Password: "admin"}
 var mu sync.Mutex
 
-func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
-	return func(w http.ResponseWriter, r *http.Request) {
-		cookie, err := r.Cookie("session")
-		if err != nil || cookie.Value != "authenticated" {
-			http.Redirect(w, r, "/login", http.StatusSeeOther)
-			return
-		}
-		next(w, r)
-	}
-}
-
 func main() {
 	http.HandleFunc("/login", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == http.MethodPost {
@@ -91,6 +80,17 @@ func main() {
 		errorParam := r.URL.Query().Get("error")
 		t.Execute(w, errorParam == "1")
 	})
+
+	func authMiddleware(next http.HandlerFunc) http.HandlerFunc {
+		return func(w http.ResponseWriter, r *http.Request) {
+			cookie, err := r.Cookie("session")
+			if err != nil || cookie.Value != "authenticated" {
+				http.Redirect(w, r, "/login", http.StatusSeeOther)
+				return
+			}
+			next(w, r)
+		}
+	}
 
 	http.HandleFunc("/", authMiddleware(func(w http.ResponseWriter, r *http.Request) {
 		tmpl := `<!DOCTYPE html>
