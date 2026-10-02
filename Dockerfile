@@ -2,7 +2,7 @@ FROM golang:1.23-alpine AS builder
 WORKDIR /app
 COPY go.mod .
 COPY main.go .
-RUN go mod tidy && go build -o ahb-panel .
+RUN go build -o ahb-panel .
 
 FROM alpine:latest
 WORKDIR /app
